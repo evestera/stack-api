@@ -1,0 +1,21 @@
+apply plugin: 'java'
+apply plugin: 'application'
+
+mainClassName = "Main"
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+	compile 'com.sparkjava:spark-core:2.2'
+
+    testCompile 'junit:junit:4.11'
+}
+
+test {
+    testLogging {
+        exceptionFormat = 'full'
+        //showStandardStreams = true
+    }
+}
