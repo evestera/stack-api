@@ -1,6 +1,6 @@
 package as.vestera.stack;
 
-class StackId {
+public class StackId {
     String name;
 
     public StackId(String name) {

@@ -69,4 +69,15 @@ public class PersistentStoreTest {
         store.push("cats", "robert'); drop table cats; --");
         assertThat(store.listStacks(), hasItem("cats"));
     }
+
+    @Test
+    public void testUnicodeValues() throws Exception {
+        store.createStack("cats");
+        store.push("cats", "辉煌虎");
+        store.push("cats", "Gråtass");
+        store.push("cats", "😸");
+        assertThat(store.pop("cats"), is("😸"));
+        assertThat(store.pop("cats"), is("Gråtass"));
+        assertThat(store.pop("cats"), is("辉煌虎"));
+    }
 }
