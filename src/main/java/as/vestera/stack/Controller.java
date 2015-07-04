@@ -1,13 +1,14 @@
 package as.vestera.stack;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import spark.ExceptionHandler;
 import spark.Request;
 import spark.Response;
 
 public class Controller {
     PersistentStore store = new PersistentStore();
-    Gson gson = new Gson();
+    Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
     public ExceptionHandler getExceptionHandler(int statusCode) {
         return (exception, request, response) -> {
@@ -35,7 +36,7 @@ public class Controller {
 
     public Object push(Request request, Response response) {
         Element element = gson.fromJson(request.body(), Element.class);
-        if (element == null || element.value == null) throw new IllegalArgumentException("No message posted");
+        if (element == null || element.value == null) throw new IllegalArgumentException("No value posted");
         String stackName = request.params(":name");
         store.push(stackName, element.value);
         return store.getStack(stackName);

@@ -27,5 +27,10 @@ public class Main {
         exception(IllegalArgumentException.class, controller.getExceptionHandler(400));
         exception(NoSuchStackException.class, controller.getExceptionHandler(404));
         exception(Exception.class, controller.getExceptionHandler(500));
+
+        after((request, response) -> {
+            response.header("Access-Control-Allow-Origin", "*");
+            response.header("Access-Control-Allow-Methods", "GET, POST, DELETE");
+        });
     }
 }
