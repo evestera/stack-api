@@ -61,4 +61,12 @@ public class PersistentStoreTest {
     public void testPopFromNonExistingStack() throws Exception {
         store.pop("dogs");
     }
+
+    @Test
+    public void testSqlInjection() throws Exception {
+        store.createStack("cats");
+        store.push("cats", "tiger");
+        store.push("cats", "robert'); drop table cats; --");
+        assertThat(store.listStacks(), hasItem("cats"));
+    }
 }

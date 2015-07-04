@@ -5,13 +5,15 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-//TODO: Fix vulnerability to SQL-injection
-
 public class PersistentStore {
-    public boolean createStack(String name) {
+    public boolean createStack(String stackName) {
+        stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            statement.executeUpdate("create table " + name + "(value text not null)");
+            String query = "create table " + stackName + "(" +
+                "rowid integer primary key autoincrement," +
+                "value text not null)";
+            statement.executeUpdate(query);
         } catch (SQLException e) {
             return false;
         }
@@ -33,6 +35,7 @@ public class PersistentStore {
     }
 
     public List<String> getStack(String stackName) {
+        stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         List<String> result = new LinkedList<>();
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
@@ -47,18 +50,23 @@ public class PersistentStore {
     }
 
     public void push(String stackName, String value) {
+        stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
-            Statement statement = connection.createStatement();
-            statement.executeUpdate("insert into " + stackName + " values('" + value + "')");
+            String query = "insert into " + stackName + "(value) values(?)";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, value);
+            statement.executeUpdate();
         } catch (SQLException e) {
             throw new NoSuchStackException("No stack with name " + stackName);
         }
     }
 
     public String pop(String stackName) {
+        stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("select rowid, value from " + stackName + " order by rowid desc limit 1;");
+            String query = "select rowid, value from " + stackName + " order by rowid desc limit 1;";
+            ResultSet rs = statement.executeQuery(query);
             if (!rs.next()) throw new NoSuchElementException("Stack " + stackName + " is empty");
             int rowid = rs.getInt("rowid");
             String value = rs.getString("value");
