@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = "Main"
+mainClassName = "as.vestera.stack.Main"
 
 repositories {
     jcenter()
@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
 	compile 'com.sparkjava:spark-core:2.2'
+    compile 'com.google.code.gson:gson:2.3.1'
 
     testCompile 'junit:junit:4.11'
 }
