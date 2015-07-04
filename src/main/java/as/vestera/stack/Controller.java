@@ -4,43 +4,36 @@ import com.google.gson.Gson;
 import spark.Request;
 import spark.Response;
 
-import java.util.*;
-
 public class Controller {
-    Map<String, Deque<String>> stacks = new HashMap<>();
+    PersistentStore store = new PersistentStore();
     Gson gson = new Gson();
 
     public Object getStackNames(Request request, Response response) {
-        return stacks.keySet();
+        return store.listStacks();
     }
 
     public Object createStack(Request request, Response response) {
         StackId id = gson.fromJson(request.body(), StackId.class);
-        stacks.computeIfAbsent(id.name, (k) -> {
+        if (store.createStack(id.name)) {
             response.status(201);
-            return new LinkedList<>();
-        });
-        return new Message("OK");
+            return new Message("Stack %s created", id.name);
+        }
+        return new Message("Stack %s already exists", id.name);
     }
 
     public Object getStack(Request request, Response response) {
-        Deque<String> stack = stacks.get(request.params(":name"));
-        if (stack == null) throw new NoSuchElementException("No such stack");
-        return stack;
+        return store.getStack(request.params(":name"));
     }
 
     public Object push(Request request, Response response) {
-        Deque<String> stack = stacks.get(request.params(":name"));
-        if (stack == null) throw new NoSuchElementException("No such stack");
-        Message message = gson.fromJson(request.body(), Message.class);
-        if (message == null || message.message == null) throw new IllegalArgumentException("No message posted");
-        stack.push(message.message);
-        return stack;
+        Element element = gson.fromJson(request.body(), Element.class);
+        if (element == null || element.value == null) throw new IllegalArgumentException("No message posted");
+        String stackName = request.params(":name");
+        store.push(stackName, element.value);
+        return store.getStack(stackName);
     }
 
     public Object pop(Request request, Response response) {
-        Deque<String> stack = stacks.get(request.params(":name"));
-        if (stack == null) throw new NoSuchElementException("No such stack");
-        return stack.pop();
+        return new Element(store.pop(request.params(":name")));
     }
 }

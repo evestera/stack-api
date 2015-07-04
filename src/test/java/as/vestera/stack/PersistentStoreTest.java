@@ -17,12 +17,12 @@ public class PersistentStoreTest {
     @Rule
     public TemporaryFolder tempFolder = new TemporaryFolder();
 
-    public PersistentStore store;
+    public PersistentStore store = new PersistentStore();
 
     @Before
     public void setUp() throws Exception {
         File tempFile = tempFolder.newFile();
-        store = new PersistentStore(tempFile.getAbsolutePath());
+        Configuration.setDbFile(tempFile.getAbsolutePath());
     }
 
     @Test
@@ -52,12 +52,12 @@ public class PersistentStoreTest {
         store.pop("dogs");
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expected = NoSuchStackException.class)
          public void testPushToNonExistingStack() throws Exception {
         store.push("dogs", "fido");
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expected = NoSuchStackException.class)
     public void testPopFromNonExistingStack() throws Exception {
         store.pop("dogs");
     }

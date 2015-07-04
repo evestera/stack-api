@@ -1,7 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-mainClassName = "as.vestera.stack.Main"
+mainClassName = 'as.vestera.stack.Main'
 
 repositories {
     jcenter()
@@ -13,6 +13,7 @@ dependencies {
     compile 'org.xerial:sqlite-jdbc:3.8.10.1'
 
     testCompile 'junit:junit:4.11'
+    testCompile 'com.mashape.unirest:unirest-java:1.4.5'
 }
 
 test {

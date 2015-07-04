@@ -8,14 +8,8 @@ import java.util.NoSuchElementException;
 //TODO: Fix vulnerability to SQL-injection
 
 public class PersistentStore {
-    private final String dbname;
-
-    public PersistentStore(String dbname) {
-        this.dbname = dbname;
-    }
-
     public boolean createStack(String name) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbname)) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
             statement.executeUpdate("create table " + name + "(value text not null)");
         } catch (SQLException e) {
@@ -26,7 +20,7 @@ public class PersistentStore {
 
     public List<String> listStacks() {
         List<String> result = new LinkedList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbname)) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("select name from sqlite_master where type = 'table'");
             while (rs.next()) {
@@ -38,40 +32,40 @@ public class PersistentStore {
         return result;
     }
 
-    public List<String> getStack(String name) {
+    public List<String> getStack(String stackName) {
         List<String> result = new LinkedList<>();
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbname)) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("select value from " + name);
+            ResultSet rs = statement.executeQuery("select value from " + stackName);
             while (rs.next()) {
                 result.add(rs.getString("value"));
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new NoSuchStackException("No stack with name " + stackName);
         }
         return result;
     }
 
     public void push(String stackName, String value) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbname)) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
             statement.executeUpdate("insert into " + stackName + " values('" + value + "')");
         } catch (SQLException e) {
-            throw new NoSuchElementException();
+            throw new NoSuchStackException("No stack with name " + stackName);
         }
     }
 
     public String pop(String stackName) {
-        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + dbname)) {
+        try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
             ResultSet rs = statement.executeQuery("select rowid, value from " + stackName + " order by rowid desc limit 1;");
-            if (!rs.next()) throw new NoSuchElementException();
+            if (!rs.next()) throw new NoSuchElementException("Stack " + stackName + " is empty");
             int rowid = rs.getInt("rowid");
             String value = rs.getString("value");
             statement.executeUpdate("delete from " + stackName + " where rowid = " + rowid);
             return value;
         } catch (SQLException e) {
-            throw new NoSuchElementException();
+            throw new NoSuchStackException("No stack with name " + stackName);
         }
     }
 }
