@@ -53,7 +53,7 @@ public class PersistentStoreTest {
     }
 
     @Test(expected = NoSuchStackException.class)
-         public void testPushToNonExistingStack() throws Exception {
+    public void testPushToNonExistingStack() throws Exception {
         store.push("dogs", "fido");
     }
 

@@ -1,12 +1,20 @@
 package as.vestera.stack;
 
 import com.google.gson.Gson;
+import spark.ExceptionHandler;
 import spark.Request;
 import spark.Response;
 
 public class Controller {
     PersistentStore store = new PersistentStore();
     Gson gson = new Gson();
+
+    public ExceptionHandler getExceptionHandler(int statusCode) {
+        return (exception, request, response) -> {
+            response.status(statusCode);
+            response.body(gson.toJson(new ErrorMessage(exception)));
+        };
+    }
 
     public Object getStackNames(Request request, Response response) {
         return store.listStacks();

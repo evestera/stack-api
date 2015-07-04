@@ -23,19 +23,9 @@ public class Main {
         post("/stacks/:name/push", controller::push, gson::toJson);
         post("/stacks/:name/pop", controller::pop, gson::toJson);
 
-        exception(NoSuchElementException.class, (exception, request, response) -> {
-            response.status(400);
-            response.body(gson.toJson(new ErrorMessage(exception)));
-        });
-
-        exception(NoSuchStackException.class, (exception, request, response) -> {
-            response.status(404);
-            response.body(gson.toJson(new ErrorMessage(exception)));
-        });
-
-        exception(Exception.class, (exception, request, response) -> {
-            response.status(500);
-            response.body(gson.toJson(new ErrorMessage(exception)));
-        });
+        exception(NoSuchElementException.class, controller.getExceptionHandler(400));
+        exception(IllegalArgumentException.class, controller.getExceptionHandler(400));
+        exception(NoSuchStackException.class, controller.getExceptionHandler(404));
+        exception(Exception.class, controller.getExceptionHandler(500));
     }
 }
