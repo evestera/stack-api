@@ -62,6 +62,11 @@ public class PersistentStoreTest {
         store.pop("dogs");
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void testEmptyStackName() throws Exception {
+        store.createStack("");
+    }
+
     @Test
     public void testSqlInjection() throws Exception {
         store.createStack("cats");
