@@ -80,4 +80,11 @@ public class PersistentStoreTest {
         assertThat(store.pop("cats"), is("Gråtass"));
         assertThat(store.pop("cats"), is("辉煌虎"));
     }
+
+    @Test
+    public void testHidingInternalTables() throws Exception {
+        store.createStack("cats");
+        store.push("cats", "bob");
+        assertThat(store.listStacks(), not(hasItem("sqlite_sequence")));
+    }
 }

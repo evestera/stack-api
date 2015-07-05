@@ -10,7 +10,7 @@ public class PersistentStore {
         stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            String query = "create table " + stackName + "(" +
+            String query = "create table stacks_" + stackName + "(" +
                 "rowid integer primary key autoincrement," +
                 "value text not null)";
             statement.executeUpdate(query);
@@ -24,10 +24,15 @@ public class PersistentStore {
         List<String> result = new LinkedList<>();
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("select name from sqlite_master where type = 'table'");
+            ResultSet rs = statement.executeQuery(
+                "select name from sqlite_master " +
+                    "where type = 'table' " +
+                    "and name like 'stacks_%'"
+            );
             while (rs.next()) {
                 result.add(rs.getString("name"));
             }
+            result.replaceAll(s -> s.substring("stacks_".length()));
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -39,7 +44,7 @@ public class PersistentStore {
         List<String> result = new LinkedList<>();
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            ResultSet rs = statement.executeQuery("select value from " + stackName);
+            ResultSet rs = statement.executeQuery("select value from stacks_" + stackName);
             while (rs.next()) {
                 result.add(rs.getString("value"));
             }
@@ -52,7 +57,7 @@ public class PersistentStore {
     public void push(String stackName, String value) {
         stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
-            String query = "insert into " + stackName + "(value) values(?)";
+            String query = "insert into stacks_" + stackName + "(value) values(?)";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, value);
             statement.executeUpdate();
@@ -65,12 +70,12 @@ public class PersistentStore {
         stackName = stackName.replaceAll("[^A-Za-z0-9]", "");
         try (Connection connection = DriverManager.getConnection("jdbc:sqlite:" + Configuration.getDbFile())) {
             Statement statement = connection.createStatement();
-            String query = "select rowid, value from " + stackName + " order by rowid desc limit 1;";
+            String query = "select rowid, value from stacks_" + stackName + " order by rowid desc limit 1;";
             ResultSet rs = statement.executeQuery(query);
             if (!rs.next()) throw new NoSuchElementException("Stack " + stackName + " is empty");
             int rowid = rs.getInt("rowid");
             String value = rs.getString("value");
-            statement.executeUpdate("delete from " + stackName + " where rowid = " + rowid);
+            statement.executeUpdate("delete from stacks_" + stackName + " where rowid = " + rowid);
             return value;
         } catch (SQLException e) {
             throw new NoSuchStackException("No stack with name " + stackName);
