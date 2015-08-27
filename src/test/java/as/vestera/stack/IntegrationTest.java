@@ -107,6 +107,12 @@ public class IntegrationTest {
         assertThat(response.getStatus(), is(404));
     }
 
+    @Test
+    public void testNullAsStackName() throws Exception {
+        HttpResponse<String> response = createStack(null);
+        assertThat(response.getStatus(), is(400));
+    }
+
     private HttpResponse<String> listStacks() throws UnirestException {
         return Unirest
             .get(HOST + "/stacks")

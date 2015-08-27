@@ -63,6 +63,9 @@ public class PersistentStore {
     }
 
     private String safeName(String stackName) {
+        if (stackName == null) {
+            throw new IllegalArgumentException("Stack name cannot be null");
+        }
         String alphanumerical = stackName.replaceAll("[^A-Za-z0-9]", "");
         if (alphanumerical.isEmpty()) {
             throw new IllegalArgumentException("\"" + stackName + "\" is not a valid stack name");
