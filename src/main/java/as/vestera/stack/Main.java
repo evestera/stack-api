@@ -12,9 +12,7 @@ public class Main {
         port(Configuration.getPort());
 
         Controller controller = new Controller();
-        Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
-            .create();
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
 
         get("/stacks", controller::getStackNames, gson::toJson);
         post("/stacks", controller::createStack, gson::toJson);
